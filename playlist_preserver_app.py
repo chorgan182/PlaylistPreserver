@@ -10,26 +10,36 @@ Created on Tue Feb  1 19:35:20 2022
 # libraries
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials
 import streamlit as st
-import os
-
-# set ids and secrets
-os.environ["SPOTIPY_CLIENT_ID"] = "490a0db12cc04207bdc1719f40132717"
-os.environ["SPOTIPY_CLIENT_SECRET"] = "21466d35e131432dbe3214377696d04e"
-os.environ["SPOTIPY_REDIRECT_URI"] = "http://127.0.0.1:9090"
-
 
 # %% spotify connection
 
+# import secrets from streamlit deployment
+pl_prsvr_client_id = st.secrets["SPOTIPY_CLIENT_ID"]
+pl_prsvr_client_secret = st.secrets["SPOTIPY_CLIENT_SECRET"]
+pl_prsvr_redirect_uri = st.secrets["SPOTIPY_REDIRECT_URI"]
+
+# set the client creds for connections to spotify api
+client_creds = SpotifyClientCredentials(client_id=pl_prsvr_client_id,
+                                        client_secret=pl_prsvr_client_secret)
+
 # set scope and establish connection
-#scope = "user-read-currently-playing"
-#scope = "user-read-playback-state"
 scope_user = "user-read-private"
 scope_plist_read = "playlist-read-private"
 scope_plist_write = "playlist-modify-private"
-sp_pl_read = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope_plist_read))
-sp_pl_write = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope_plist_write))
-sp_user = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope_user))
+sp_pl_read = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(scope=scope_plist_read,
+                              redirect_uri=pl_prsvr_redirect_uri),
+    client_credentials_manager=client_creds)
+sp_pl_write = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(scope=scope_plist_write,
+                              redirect_uri=pl_prsvr_redirect_uri),
+    client_credentials_manager=client_creds)
+sp_user = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(scope=scope_user,
+                              redirect_uri=pl_prsvr_redirect_uri),
+    client_credentials_manager=client_creds)
 
 # %% app prep
 
@@ -58,10 +68,6 @@ st.title("Spotify Playlist Preserver")
 st.text("Please pick a playlist to modify")
 
 st.selectbox("Playlist: ", playlist_names)
-
-
-
-
 
 # radio button
 # first argument is the title of the radio button
