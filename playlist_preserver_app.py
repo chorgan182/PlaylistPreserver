@@ -16,38 +16,56 @@ import streamlit as st
 # %% spotify connection
 
 # import secrets from streamlit deployment
-pl_prsvr_client_id = st.secrets["SPOTIPY_CLIENT_ID"]
-pl_prsvr_client_secret = st.secrets["SPOTIPY_CLIENT_SECRET"]
-pl_prsvr_redirect_uri = st.secrets["SPOTIPY_REDIRECT_URI"]
+cid = st.secrets["SPOTIPY_CLIENT_ID"]
+csecret = st.secrets["SPOTIPY_CLIENT_SECRET"]
+uri = st.secrets["SPOTIPY_REDIRECT_URI"]
 
 # set the client creds for connections to spotify api
-client_creds = SpotifyClientCredentials(client_id=pl_prsvr_client_id,
-                                        client_secret=pl_prsvr_client_secret)
+client_creds = SpotifyClientCredentials(client_id=cid,
+                                        client_secret=csecret)
 
 # set scope and establish connection
-scope_user = "user-read-private"
-scope_plist_read = "playlist-read-private"
-scope_plist_write = "playlist-modify-private"
-sp_pl_read = spotipy.Spotify(
-    auth_manager=SpotifyOAuth(scope=scope_plist_read,
-                              redirect_uri=pl_prsvr_redirect_uri),
-    client_credentials_manager=client_creds)
-sp_pl_write = spotipy.Spotify(
-    auth_manager=SpotifyOAuth(scope=scope_plist_write,
-                              redirect_uri=pl_prsvr_redirect_uri),
-    client_credentials_manager=client_creds)
-sp_user = spotipy.Spotify(
-    auth_manager=SpotifyOAuth(scope=scope_user,
-                              redirect_uri=pl_prsvr_redirect_uri),
-    client_credentials_manager=client_creds)
+scopes = {
+    "user": "user-read-private",
+    "read": "playlist-read-private",
+    "write": "playlist-modify-private"
+}
+
+oauth_user = SpotifyOAuth(scope=scopes["user"],
+                          redirect_uri=uri,
+                          client_credentials_manager = client_creds)
+oauth_read = SpotifyOAuth(scope=scopes["read"],
+                          redirect_uri=uri,
+                          client_credentials_manager = client_creds)
+oauth_write = SpotifyOAuth(scope=scopes["write"],
+                          redirect_uri=uri,
+                          client_credentials_manager = client_creds)
+
+auth_url = oauth_user.get_authorize_url()
+
+
+
+
+# sp_user = spotipy.Spotify(
+#     auth_manager=,
+#     client_credentials_manager=client_creds)
+
+# sp_read = spotipy.Spotify(
+#     auth_manager=SpotifyOAuth(scope=scope_plist_read,
+#                               redirect_uri=pl_prsvr_redirect_uri),
+#     client_credentials_manager=client_creds)
+# sp_write = spotipy.Spotify(
+#     auth_manager=SpotifyOAuth(scope=scope_plist_write,
+#                               redirect_uri=pl_prsvr_redirect_uri),
+#     client_credentials_manager=client_creds)
 
 # %% app prep
 
 # get user playlists
-user_id = sp_user.current_user()["id"]
+#user_id = sp_user.current_user()["id"]
 
-playlists = sp_pl_read.user_playlists(user_id)
-playlist_names = [x["name"] for x in playlists["items"]]
+# playlists = sp_pl_read.user_playlists(user_id)
+# playlist_names = [x["name"] for x in playlists["items"]]
 
 # bc results are paginated, need to define a func to get all results
 ### should implement eventually but I only have 30
@@ -65,9 +83,21 @@ playlist_names = [x["name"] for x in playlists["items"]]
 
 st.title("Spotify Playlist Preserver")
 
-st.text("Please pick a playlist to modify")
+st.header("Connect to Spotify")
+st.write(auth_url)
+response = st.text_input("Click the link above, copy the URL from the new tab, paste it here, and press enter: ")
+code = oauth_user.parse_response_code(response)
+token_info = oauth_user.get_access_token(code)
+token = token_info["access_token"]
+sp_user = spotipy.Spotify(auth=token)
 
-st.selectbox("Playlist: ", playlist_names)
+st.text("This is a test!")
+st.text(sp_user.current_user()["id"])
+
+
+#st.text("Please pick a playlist to modify")
+
+#st.selectbox("Playlist: ", playlist_names)
 
 # radio button
 # first argument is the title of the radio button
