@@ -33,13 +33,14 @@ scopes = {
 
 oauth_user = SpotifyOAuth(scope=scopes["user"],
                           redirect_uri=uri,
-                          client_credentials_manager = client_creds)
-oauth_read = SpotifyOAuth(scope=scopes["read"],
-                          redirect_uri=uri,
-                          client_credentials_manager = client_creds)
-oauth_write = SpotifyOAuth(scope=scopes["write"],
-                          redirect_uri=uri,
-                          client_credentials_manager = client_creds)
+                          client_id=cid,
+                          client_secret=csecret)
+# oauth_read = SpotifyOAuth(scope=scopes["read"],
+#                           redirect_uri=uri,
+#                           client_credentials_manager = client_creds)
+# oauth_write = SpotifyOAuth(scope=scopes["write"],
+#                           redirect_uri=uri,
+#                           client_credentials_manager = client_creds)
 
 auth_url = oauth_user.get_authorize_url()
 
