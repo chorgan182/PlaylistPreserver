@@ -10,7 +10,6 @@ Created on Tue Feb  1 19:35:20 2022
 # libraries
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from spotipy.oauth2 import SpotifyClientCredentials
 import streamlit as st
 
 # %% spotify connection
@@ -21,8 +20,8 @@ csecret = st.secrets["SPOTIPY_CLIENT_SECRET"]
 uri = st.secrets["SPOTIPY_REDIRECT_URI"]
 
 # set the client creds for connections to spotify api
-client_creds = SpotifyClientCredentials(client_id=cid,
-                                        client_secret=csecret)
+# client_creds = SpotifyClientCredentials(client_id=cid,
+#                                         client_secret=csecret)
 
 # set scope and establish connection
 scopes = {
@@ -44,9 +43,12 @@ oauth_user = SpotifyOAuth(scope=scopes["user"],
 
 auth_url = oauth_user.get_authorize_url()
 
-
-
-
+# temp = "http://localhost:8080/?code=AQA-Kme2mEJpRrsc1-XFvuJU3qUadtQalsiX9RL8cY4NjwOKxApyly2fTsW_UOvCji6pCT_jS0VoExwUX9_ikzIOqU8teOHyxrHVLSsf9CUEgI8PSr9Lh2sCiwG-sBBqhNkKlmKBz8YLUPTDwnTugyAFTgeToXpsh3c0m3BWyY0qV3cxqqeC8VudvCEP"
+# codetemp = oauth_user.parse_response_code(temp)
+# tokeninfotemp = oauth_user.get_access_token(codetemp)
+# tokentemp = tokeninfotemp["access_token"]
+# sp_temp = spotipy.Spotify(auth=tokentemp)
+# sp_temp.current_user()
 # sp_user = spotipy.Spotify(
 #     auth_manager=,
 #     client_credentials_manager=client_creds)
