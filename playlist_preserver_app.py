@@ -45,12 +45,14 @@ response = st.text_input(", ".join(["Click the link above",
                                    "copy the URL from the new tab",
                                    "paste it here",
                                    "and press enter: "]))
+st.write("testing the response was pasted here %s" % response)
 code = oauth.parse_response_code(response)
 token_info = oauth.get_access_token(code)
 token = token_info["access_token"]
 sp = spotipy.Spotify(auth=token)
 
 # %% test auth
+
 username = sp.current_user()["id"]
 st.write("Your username is %s" % username)
 
