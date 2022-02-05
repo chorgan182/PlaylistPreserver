@@ -11,7 +11,6 @@ Created on Tue Feb  1 19:35:20 2022
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
-# hi
 
 # %% spotify connection
 
@@ -30,30 +29,39 @@ oauth = SpotifyOAuth(scope=scopes,
                      redirect_uri=uri,
                      client_id=cid,
                      client_secret=csecret)
+sp = spotipy.Spotify(oauth_manager=oauth)
 
-# retrieve auth url
-auth_url = oauth.get_authorize_url()
+# # retrieve auth url
+# auth_url = oauth.get_authorize_url()
 
+# # sign in function
+# def sign_in(auth_url):
+#     # open the auth link in a modal window
+    
+    
+#     # get a response from the redirect uri
+#     response = "idk get it from the redirect uri"
+    
+#     # parse the token from the link
+#     code = oauth.parse_response_code(response)
+#     token_info = oauth.get_access_token(code)
+#     token = token_info["access_token"]
+    
+#     # return a spotify object    
+#     return spotipy.Spotify(auth=token,)
+
+# test = spotipy.Spotify(oauth_manager=oauth)
+# test.current_user()
 # %% app UI auth
 
 st.title("Spotify Playlist Preserver")
 
-st.header("Connect to Spotify")
-st.markdown("[Click me to authenticate!](%s)" % auth_url)
-
-response = st.text_input(", ".join(["Click the link above",
-                                   "copy the URL from the new tab",
-                                   "paste it here",
-                                   "and press enter: "]))
-st.write("testing the response was pasted here %s" % response)
-code = oauth.parse_response_code(response)
-token_info = oauth.get_access_token(code)
-token = token_info["access_token"]
-sp = spotipy.Spotify(auth=token)
+#sp = st.button("Sign in to Spotify", on_click=sign_in(auth_url))
 
 # %% test auth
 
 username = sp.current_user()["id"]
+st.write("this should work")
 st.write("Your username is %s" % username)
 
 st.write("Please pick a playlist to modify")
