@@ -12,6 +12,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
+### TBD if this gets kept
 #from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -43,10 +44,11 @@ def get_token(oauth):
     # retrieve auth url
     auth_url = oauth.get_authorize_url()
     
-    # open the auth link in a new window
+    ### not sure if this should be kept
     #s = Service("./chromedriver")
     #driver = webdriver.Chrome(service=s)
     
+    # open the auth link in a new window
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(auth_url)
     
@@ -89,7 +91,6 @@ st.title("Spotify Playlist Preserver")
 
 ### troubleshooting
 st.write(os.getcwd())
-st.write(os.listdir())
 st.write(os.system("ls -l"))
 os.chmod("./chromedriver", 777)
 st.write(os.system("ls -l"))
