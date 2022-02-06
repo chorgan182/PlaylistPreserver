@@ -37,9 +37,8 @@ oauth = SpotifyOAuth(scope=scopes,
                      client_id=cid,
                      client_secret=csecret)
 
-# %% func definitions
+# %% base func definitions
 
-# sign in function
 def get_token(oauth, user, pw):
     
     # retrieve auth url
@@ -79,11 +78,54 @@ def sign_in(token):
     sp = spotipy.Spotify(auth=token)
     return sp
 
+# %% app func definitions
+
 def update_creds():
     st.session_state["input_user"] = st.session_state["user_new"]
     st.session_state["input_pw"] = st.session_state["pw_new"]
+    
+def app_delete_creds():
+    if "input_user" in st.session_state:
+        st.session_state["input_user"] = ""
+    if "input_pw" in st.session_state:
+        st.session_state["input_pw"] = ""
+    if "user_new" in st.session_state:
+        del st.session_state["user_new"]
+    if "pw_new" in st.session_state:
+        del st.session_state["pw_new"]
+    
 
-# %% app UI auth
+def app_get_token():
+    try:
+        token = get_token(oauth,
+                          user=st.session_state["input_user"],
+                          pw=st.session_state["input_pw"])
+    except Exception as e:
+        st.error("An error occurred during token retrieval!")
+        st.write("The error is as follows:")
+        st.write(e)
+    else:
+        app_delete_creds()
+        st.session_state["cached_token"] = token
+        ### troubleshooting
+        st.write(st.session_state)
+
+def app_sign_in():
+    try:
+        sp = sign_in(st.session_state["cached_token"])
+    except Exception as e:
+        st.error("An error occurred during sign-in!")
+        st.write("The error is as follows:")
+        st.write(e)
+    else:
+        app_delete_creds()
+        st.success("Sign in success!")
+        st.session_state["signed_in"] = True
+        ### troubleshooting
+        st.write(st.session_state)
+    return sp
+
+# %% app auth
 
 st.title("Spotify Playlist Preserver")
 
@@ -102,24 +144,22 @@ st.write(st.session_state)
 
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
-    sp = sign_in(st.session_state["cached_token"])
-    st.success("Sign in success!")
-    del st.session_state["input_user"]
-    del st.session_state["input_pw"]
-elif st.session_state["input_user"] != "" and st.session_state["input_pw"] != "":
-    st.session_state["cached_token"] = get_token(oauth,
-                                                 user=st.session_state["input_user"],
-                                                 pw=st.session_state["input_pw"])
-    sp = sign_in(st.session_state["cached_token"])
-    st.success("Sign in success!")
-    del st.session_state["input_user"]
-    del st.session_state["input_pw"]
+    sp = app_sign_in()
+# get token if it does not exist and creds do
+elif (
+        st.session_state["input_user"] != "" and
+        st.session_state["input_pw"] != ""
+     ):
+    app_get_token()
+    sp = app_sign_in()
 else:
     st.write("No tokens found for this session. Please log in below.")
 
 # display the login button
 sign_in_clicked = st.button("Sign in to Spotify",
                             disabled=st.session_state["signed_in"])
+
+# %% app auth form
 
 # log in once the button is clicked
 # save the token in this session to prevent multiple sign-ins
@@ -135,21 +175,8 @@ if sign_in_clicked and "sp" not in locals():
                            key="pw_new")
         submitted = st.form_submit_button("Log in", on_click=update_creds)
 
-        # if submitted:
-        #     st.session_state["input_user"] = user
-        #     st.session_state["input_pw"] = pw
-        #     st.session_state["cached_token"] = get_token(oauth,
-        #                                                  user=user,
-        #                                                  pw=pw)
-        #     sp = sign_in(st.session_state["cached_token"])
-        #     st.success("Sign in success!")
-            # except Exception as e:
-            #     st.write("An error occurred during authentication!")
-            #     st.write("The error is as follows:")
-            #     st.write(e)
-            # else:
-            #     st.session_state["signed_in"] = True
-    
+# %% app after auth
+
 # only display the following after login
 if "sp" in locals():
     user = sp.current_user()
