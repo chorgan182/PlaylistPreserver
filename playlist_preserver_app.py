@@ -16,6 +16,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import quote
+import os
 
 # %% spotify connection
 
@@ -82,6 +83,10 @@ def sign_in(token):
 # %% app UI auth
 
 st.title("Spotify Playlist Preserver")
+
+### troubleshooting
+st.write(os.getcwd())
+
 
 # initialize session variables
 if "signed_in" not in st.session_state:
