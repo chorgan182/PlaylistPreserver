@@ -12,11 +12,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
+from selenium.webdriver.firefox import service
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
 import os
 
 # %% spotify connection set up
@@ -44,11 +44,14 @@ def get_token(oauth, user, pw):
     # retrieve auth url
     auth_url = oauth.get_authorize_url()
     
-    # open the auth link in a new window
-    chrome_options = Options()
-    chrome_options.headless = True
-    driver = webdriver.Chrome(ChromeDriverManager().install(),
-                              options=chrome_options)
+    # pass a service object to avoid deprecation warning
+    s = service("/home/appuser/.wdm/drivers/geckodriver/linux64/v0.30.0/geckodriver")
+    
+    # open the auth link in a new headless window
+    fireFoxOptions = Options()
+    fireFoxOptions.headless = True
+    driver = webdriver.Firefox(service=s,
+                               options=fireFoxOptions)
     driver.get(auth_url)
     
     # pass the provided user and pw
