@@ -88,6 +88,9 @@ if "signed_in" not in st.session_state:
     st.session_state["signed_in"] = False
 if "cached_token" not in st.session_state:
     st.session_state["cached_token"] = None
+    
+### troubleshooting
+st.write(st.session_state)
 
 # attempt sign in with cached token
 if st.session_state["cached_token"] is not None:
@@ -104,25 +107,34 @@ sign_in_clicked = st.button("Sign in to Spotify",
 # save the token in this session to prevent multiple sign-ins
 if sign_in_clicked and "sp" not in locals():
     
-    with st.form("login", clear_on_submit=True):
-        input_user = st.text_input("User",
-                                   placeholder="Email associated with Spotify account")
-        input_pw = st.text_input("Password",
-                                 placeholder="Spotify password",
-                                 type="password")
-        submitted = st.form_submit_button("Log in")
-        if submitted:
-            try:
-                token = get_token(oauth, user=input_user, pw=input_pw)
-                sp = sign_in(token)
-                st.session_state["cached_token"] = token
-                st.write("sign in success!")
-            except Exception as e:
-                st.write("An error occurred during authentication!")
-                st.write("The error is as follows:")
-                st.write(e)
-            else:
-                st.session_state["signed_in"] = True
+    # with st.form("login", clear_on_submit=True):
+    #     input_user = st.text_input("User",
+    #                                placeholder="Email associated with Spotify account")
+    #     input_pw = st.text_input("Password",
+    #                              placeholder="Spotify password",
+    #                              type="password")
+    #     submitted = st.form_submit_button("Log in")
+    
+    form = st.form("login")
+    input_user = form.text_input("User",
+                                 placeholder="Email associated with Spotify account")
+    input_pw = form.text_input("Password",
+                               placeholder="Spotify password",
+                               type="password")
+    submitted = form.form_submit_button("Log in")
+
+    if submitted:
+        try:
+            token = get_token(oauth, user=input_user, pw=input_pw)
+            sp = sign_in(token)
+            st.session_state["cached_token"] = token
+            st.write("sign in success!")
+        except Exception as e:
+            st.write("An error occurred during authentication!")
+            st.write("The error is as follows:")
+            st.write(e)
+        else:
+            st.session_state["signed_in"] = True
     
 # only display the following after login
 if "sp" in locals():
