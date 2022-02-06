@@ -12,7 +12,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
-from selenium.webdriver.firefox import Service
+from selenium.webdriver.firefox import service
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -43,7 +43,7 @@ def get_token(oauth, user, pw):
     auth_url = oauth.get_authorize_url()
     
     ### not sure if this should be kept
-    s = Service("/home/appuser/.wdm/drivers/geckodriver/linux64/v0.30.0/geckodriver")
+    s = service("/home/appuser/.wdm/drivers/geckodriver/linux64/v0.30.0/geckodriver")
     
     # open the auth link in a new headless window
     fireFoxOptions = Options()
