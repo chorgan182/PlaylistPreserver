@@ -12,13 +12,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
-### TBD if this gets kept
-#from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.firefox import GeckoDriverManager 
 from urllib.parse import quote
 import os
-from webdriver_manager.chrome import ChromeDriverManager
 
 # %% spotify connection
 
@@ -49,7 +47,7 @@ def get_token(oauth):
     #driver = webdriver.Chrome(service=s)
     
     # open the auth link in a new window
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver = webdriver.Firefox(GeckoDriverManager().install())
     driver.get(auth_url)
     
     # wait until the user inputs creds and the url changes
@@ -90,17 +88,13 @@ def sign_in(token):
 st.title("Spotify Playlist Preserver")
 
 ### troubleshooting
-count_chrome = os.popen("apt --installed list | grep google-chrome | wc -l").read()
-found = int(count_chrome) > 0
-st.write(count_chrome)
+count = os.popen("apt --installed list | grep firefox | wc -l").read()
+found = int(count) > 0
+st.write(count)
 st.write(found)
-# if not found:
-#     if "google-chrome-stable_current_amd64.deb" not in os.listdir():
-#         os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-#     else:
-#         os.system("sudo apt install ./google-chrome-stable_current_amd64.deb")
-# else:
-#     st.write("Google Chrome installed already")
+
+### temp remove
+os.system("rm google-chrome*")
 
 st.write(os.listdir())
 
