@@ -38,7 +38,7 @@ oauth = SpotifyOAuth(scope=scopes,
                      client_secret=csecret)
 
 # sign in function
-def get_token(oauth):
+def get_token(oauth, user, pw):
     
     # retrieve auth url
     auth_url = oauth.get_authorize_url()
@@ -52,6 +52,12 @@ def get_token(oauth):
     driver = webdriver.Firefox(service=s,
                                options=fireFoxOptions)
     driver.get(auth_url)
+    
+    # pass the provided user and pw
+    driver.find_element_by_id("login-email").send_keys(user)
+    driver.find_element_by_id("login-password").send_keys(pw)
+    # click login
+    driver.find_element_by_id("login-button").click()
     
     # wait until the user inputs creds and the url changes
     encoded_uri = quote(uri, safe="")
@@ -118,16 +124,25 @@ sign_in_clicked = st.button("Sign in to Spotify",
 # log in once the button is clicked
 # save the token in this session to prevent multiple sign-ins
 if sign_in_clicked and "sp" not in locals():
-    try:
-        token = get_token(oauth)
-        sp = sign_in(token)
-        st.session_state["cached_token"] = token
-    except Exception as e:
-        st.write("An error occurred during authentication!")
-        st.write("The error is as follows:")
-        st.write(e)
-    else:
-        st.session_state["signed_in"] = True
+    
+    with st.form("login", clear_on_submit=True):
+        input_user = st.text_input("User",
+                                   placeholder="Email associated with Spotify account")
+        input_pw = st.text_input("Password",
+                                 placeholder="Spotify password",
+                                 type="password")
+        submitted = st.form_submit_button("Log in")
+        if submitted:
+            try:
+                token = get_token(oauth, user=input_user, pw=input_pw)
+                sp = sign_in(token)
+                st.session_state["cached_token"] = token
+            except Exception as e:
+                st.write("An error occurred during authentication!")
+                st.write("The error is as follows:")
+                st.write(e)
+            else:
+                st.session_state["signed_in"] = True
     
 # only display the following after login
 if "sp" in locals():
