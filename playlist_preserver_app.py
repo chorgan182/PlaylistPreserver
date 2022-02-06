@@ -83,15 +83,6 @@ def sign_in(token):
 
 st.title("Spotify Playlist Preserver")
 
-### troubleshooting
-count = os.popen("apt --installed list | grep firefox | wc -l").read()
-found = int(count) > 0
-st.write(count)
-st.write(found)
-
-st.write(os.listdir())
-
-
 # initialize session variables
 if "signed_in" not in st.session_state:
     st.session_state["signed_in"] = False
@@ -101,6 +92,7 @@ if "cached_token" not in st.session_state:
 # attempt sign in with cached token
 if st.session_state["cached_token"] is not None:
     sp = sign_in(st.session_state["cached_token"])
+    st.write("sign in success!")
 else:
     st.write("No tokens found for this session. Please log in below.")
 
@@ -124,6 +116,7 @@ if sign_in_clicked and "sp" not in locals():
                 token = get_token(oauth, user=input_user, pw=input_pw)
                 sp = sign_in(token)
                 st.session_state["cached_token"] = token
+                st.write("sign in success!")
             except Exception as e:
                 st.write("An error occurred during authentication!")
                 st.write("The error is as follows:")
