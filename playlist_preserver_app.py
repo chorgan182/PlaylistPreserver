@@ -36,6 +36,8 @@ oauth = SpotifyOAuth(scope=scopes,
                      client_id=cid,
                      client_secret=csecret)
 
+os.chmod("./chromedriver", 777)
+
 # sign in function
 def get_token(oauth):
     
