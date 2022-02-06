@@ -91,7 +91,7 @@ st.title("Spotify Playlist Preserver")
 
 ### troubleshooting
 count_chrome = os.popen("apt --installed list | grep google-chrome | wc -l").read()
-found = count_chrome > 0
+found = int(count_chrome) > 0
 st.write(count_chrome)
 st.write(found)
 if not found:
