@@ -17,6 +17,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import quote
+import os
 
 # %% spotify connection
 
@@ -69,7 +70,7 @@ def get_token(oauth, user, pw):
     
     # parse the token from the response url
     code = oauth.parse_response_code(response_url)
-    token = oauth.get_access_token(code, as_dict=False)
+    token = oauth.get_access_token(code, as_dict=False, check_cache=False)
     
     # return the token
     return token
@@ -90,6 +91,7 @@ if "cached_token" not in st.session_state:
     
 ### troubleshooting
 st.write(st.session_state)
+st.write(os.listdir())
 
 # attempt sign in with cached token
 if st.session_state["cached_token"] is not None:
