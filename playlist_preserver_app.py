@@ -78,19 +78,6 @@ def get_token(oauth, user, pw):
 def sign_in(token):
     sp = spotipy.Spotify(auth=token)
     return sp
-    
-
-### doesn't work rn, wanted to disable the button with this func on callback
-# def check_sign_in():
-#     try:
-#         id_check = sp.me()["id"]
-#     except:
-#         id_check = None
-        
-#     if id_check is not None:
-#         st.session_state["signed_in"] = True
-#     else:
-#         st.session_state["signed_in"] = False
 
 # %% app UI auth
 
