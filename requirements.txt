@@ -1,3 +1,2 @@
 spotipy
 selenium
-urllib
