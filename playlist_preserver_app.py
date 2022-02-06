@@ -90,10 +90,12 @@ def sign_in(token):
 st.title("Spotify Playlist Preserver")
 
 ### troubleshooting
-st.write(os.getcwd())
-st.write(os.system("ls -l"))
-os.chmod("./chromedriver", 777)
-st.write(os.system("ls -l"))
+found = os.popen("apt --installed list | grep google-chrome | wc -l").read()
+if not found:
+    os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+    os.system("sudo apt install ./google-chrome-stable_current_amd64.deb")
+else:
+    st.write("Google Chrome installed already")
 
 # initialize session variables
 if "signed_in" not in st.session_state:
