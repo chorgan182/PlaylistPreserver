@@ -12,14 +12,14 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from urllib.parse import quote
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import os
 
-# %% spotify connection
+# %% spotify connection set up
 
 # import secrets from streamlit deployment
 cid = st.secrets["SPOTIPY_CLIENT_ID"]
@@ -37,31 +37,29 @@ oauth = SpotifyOAuth(scope=scopes,
                      client_id=cid,
                      client_secret=csecret)
 
+# %% func definitions
+
 # sign in function
 def get_token(oauth, user, pw):
     
     # retrieve auth url
     auth_url = oauth.get_authorize_url()
     
-    ### not sure if this should be kept
-    s = Service("/home/appuser/.wdm/drivers/geckodriver/linux64/v0.30.0/geckodriver")
-    
-    # open the auth link in a new headless window
-    fireFoxOptions = Options()
-    fireFoxOptions.headless = True
-    driver = webdriver.Firefox(service=s,
-                               options=fireFoxOptions)
+    # open the auth link in a new window
+    chrome_options = Options()
+    chrome_options.headless = True
+    driver = webdriver.Chrome(ChromeDriverManager().install(),
+                              options=chrome_options)
     driver.get(auth_url)
     
     # pass the provided user and pw
-    driver.find_element_by_id("login-email").send_keys(user)
-    driver.find_element_by_id("login-password").send_keys(pw)
+    driver.find_element(by=By.ID, value="login-username").send_keys(user)
+    driver.find_element(by=By.ID, value="login-password").send_keys(pw)
     # click login
-    driver.find_element_by_id("login-button").click()
+    driver.find_element(by=By.ID, value="login-button").click()
     
     # wait until the user inputs creds and the url changes
-    encoded_uri = quote(uri, safe="")
-    WebDriverWait(driver, 120).until(EC.url_contains(encoded_uri),
+    WebDriverWait(driver, 120).until(EC.url_contains("code="),
                                     "Sign in timed out")
     # get the new url
     response_url = driver.current_url
@@ -70,7 +68,9 @@ def get_token(oauth, user, pw):
     
     # parse the token from the response url
     code = oauth.parse_response_code(response_url)
-    token = oauth.get_access_token(code, as_dict=False)
+    token = oauth.get_access_token(code, as_dict=False, check_cache=False)
+    # remove cached token saved in directory
+    os.remove(".cache")
     
     # return the token
     return token
@@ -78,6 +78,10 @@ def get_token(oauth, user, pw):
 def sign_in(token):
     sp = spotipy.Spotify(auth=token)
     return sp
+
+def update_creds():
+    st.session_state["input_user"] = st.session_state["user_new"]
+    st.session_state["input_pw"] = st.session_state["pw_new"]
 
 # %% app UI auth
 
@@ -87,15 +91,29 @@ st.title("Spotify Playlist Preserver")
 if "signed_in" not in st.session_state:
     st.session_state["signed_in"] = False
 if "cached_token" not in st.session_state:
-    st.session_state["cached_token"] = None
+    st.session_state["cached_token"] = ""
+if "input_user" not in st.session_state:
+    st.session_state["input_user"] = ""
+if "input_pw" not in st.session_state:
+    st.session_state["input_pw"] = ""
     
 ### troubleshooting
 st.write(st.session_state)
 
 # attempt sign in with cached token
-if st.session_state["cached_token"] is not None:
+if st.session_state["cached_token"] != "":
     sp = sign_in(st.session_state["cached_token"])
-    st.write("sign in success!")
+    st.success("Sign in success!")
+    del st.session_state["input_user"]
+    del st.session_state["input_pw"]
+elif st.session_state["input_user"] != "" and st.session_state["input_pw"] != "":
+    st.session_state["cached_token"] = get_token(oauth,
+                                                 user=st.session_state["input_user"],
+                                                 pw=st.session_state["input_pw"])
+    sp = sign_in(st.session_state["cached_token"])
+    st.success("Sign in success!")
+    del st.session_state["input_user"]
+    del st.session_state["input_pw"]
 else:
     st.write("No tokens found for this session. Please log in below.")
 
@@ -107,34 +125,30 @@ sign_in_clicked = st.button("Sign in to Spotify",
 # save the token in this session to prevent multiple sign-ins
 if sign_in_clicked and "sp" not in locals():
     
-    # with st.form("login", clear_on_submit=True):
-    #     input_user = st.text_input("User",
-    #                                placeholder="Email associated with Spotify account")
-    #     input_pw = st.text_input("Password",
-    #                              placeholder="Spotify password",
-    #                              type="password")
-    #     submitted = st.form_submit_button("Log in")
-    
-    form = st.form("login")
-    input_user = form.text_input("User",
-                                 placeholder="Email associated with Spotify account")
-    input_pw = form.text_input("Password",
-                               placeholder="Spotify password",
-                               type="password")
-    submitted = form.form_submit_button("Log in")
+    with st.form("login", clear_on_submit=True):
+        user = st.text_input("User",
+                             placeholder="Email associated with Spotify account",
+                             key="user_new")
+        pw = st.text_input("Password",
+                           placeholder="Spotify password",
+                           type="password",
+                           key="pw_new")
+        submitted = st.form_submit_button("Log in", on_click=update_creds)
 
-    if submitted:
-        try:
-            token = get_token(oauth, user=input_user, pw=input_pw)
-            sp = sign_in(token)
-            st.session_state["cached_token"] = token
-            st.write("sign in success!")
-        except Exception as e:
-            st.write("An error occurred during authentication!")
-            st.write("The error is as follows:")
-            st.write(e)
-        else:
-            st.session_state["signed_in"] = True
+        # if submitted:
+        #     st.session_state["input_user"] = user
+        #     st.session_state["input_pw"] = pw
+        #     st.session_state["cached_token"] = get_token(oauth,
+        #                                                  user=user,
+        #                                                  pw=pw)
+        #     sp = sign_in(st.session_state["cached_token"])
+        #     st.success("Sign in success!")
+            # except Exception as e:
+            #     st.write("An error occurred during authentication!")
+            #     st.write("The error is as follows:")
+            #     st.write(e)
+            # else:
+            #     st.session_state["signed_in"] = True
     
 # only display the following after login
 if "sp" in locals():
