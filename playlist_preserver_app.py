@@ -106,8 +106,10 @@ if sign_in_clicked and "sp" not in locals():
         token = get_token(oauth)
         sp = sign_in(token)
         st.session_state["cached_token"] = token
-    except:
+    except Exception as e:
         st.write("An error occurred during authentication!")
+        st.write("The error is as follows:")
+        st.write(e)
     else:
         st.session_state["signed_in"] = True
     
