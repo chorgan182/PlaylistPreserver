@@ -12,11 +12,12 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+#from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import quote
 import os
+from webdriver_manager.chrome import ChromeDriverManager
 
 # %% spotify connection
 
@@ -43,8 +44,10 @@ def get_token(oauth):
     auth_url = oauth.get_authorize_url()
     
     # open the auth link in a new window
-    s = Service("./chromedriver")
-    driver = webdriver.Chrome(service=s)
+    #s = Service("./chromedriver")
+    #driver = webdriver.Chrome(service=s)
+    
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(auth_url)
     
     # wait until the user inputs creds and the url changes
