@@ -94,13 +94,13 @@ count_chrome = os.popen("apt --installed list | grep google-chrome | wc -l").rea
 found = int(count_chrome) > 0
 st.write(count_chrome)
 st.write(found)
-if not found:
-    if "google-chrome-stable_current_amd64.deb" not in os.listdir():
-        os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    else:
-        os.system("apt install ./google-chrome-stable_current_amd64.deb")
-else:
-    st.write("Google Chrome installed already")
+# if not found:
+#     if "google-chrome-stable_current_amd64.deb" not in os.listdir():
+#         os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+#     else:
+#         os.system("sudo apt install ./google-chrome-stable_current_amd64.deb")
+# else:
+#     st.write("Google Chrome installed already")
 
 st.write(os.listdir())
 
