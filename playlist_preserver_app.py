@@ -86,6 +86,7 @@ st.title("Spotify Playlist Preserver")
 
 ### troubleshooting
 st.write(os.getcwd())
+st.write(os.listdir())
 
 
 # initialize session variables
