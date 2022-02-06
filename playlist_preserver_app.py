@@ -110,8 +110,6 @@ def app_get_token():
     else:
         app_delete_creds()
         st.session_state["cached_token"] = token
-        ### troubleshooting
-        st.write(st.session_state)
 
 def app_sign_in():
     try:
@@ -124,8 +122,6 @@ def app_sign_in():
         app_delete_creds()
         st.success("Sign in success!")
         st.session_state["signed_in"] = True
-        ### troubleshooting
-        st.write(st.session_state)
     return sp
 
 # %% app auth
@@ -141,9 +137,6 @@ if "input_user" not in st.session_state:
     st.session_state["input_user"] = ""
 if "input_pw" not in st.session_state:
     st.session_state["input_pw"] = ""
-    
-### troubleshooting
-st.write(st.session_state)
 
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
