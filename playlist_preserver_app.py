@@ -14,10 +14,11 @@ import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.firefox import service
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+#@from selenium.webdriver.support.ui import WebDriverWait
+#from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import os
+import time
 
 # %% spotify connection set up
 
@@ -60,9 +61,10 @@ def get_token(oauth, user, pw):
     # click login
     driver.find_element(by=By.ID, value="login-button").click()
     
-    # wait until the user inputs creds and the url changes
-    WebDriverWait(driver, 120).until(EC.url_contains("code="),
-                                    "Sign in timed out")
+    # # wait until the user inputs creds and the url changes
+    # WebDriverWait(driver, 120).until(EC.url_contains("code="),
+    #                                 "Sign in timed out")
+    time.sleep(5)
     # get the new url
     response_url = driver.current_url
     # close window
