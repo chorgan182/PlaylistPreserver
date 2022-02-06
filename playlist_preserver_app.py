@@ -36,8 +36,6 @@ oauth = SpotifyOAuth(scope=scopes,
                      client_id=cid,
                      client_secret=csecret)
 
-os.chmod("./chromedriver", 777)
-
 # sign in function
 def get_token(oauth):
     
@@ -89,7 +87,9 @@ st.title("Spotify Playlist Preserver")
 ### troubleshooting
 st.write(os.getcwd())
 st.write(os.listdir())
-
+st.write(os.system("ls -l"))
+os.chmod("./chromedriver", 777)
+st.write(os.system("ls -l"))
 
 # initialize session variables
 if "signed_in" not in st.session_state:
