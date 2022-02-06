@@ -12,12 +12,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox import Service
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import quote
-import os
 
 # %% spotify connection
 
