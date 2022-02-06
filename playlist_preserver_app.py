@@ -95,8 +95,10 @@ found = int(count_chrome) > 0
 st.write(count_chrome)
 st.write(found)
 if not found:
-    os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    os.system("sudo apt install ./google-chrome-stable_current_amd64.deb")
+    if "google-chrome-stable_current_amd64.deb" not in os.listdir():
+        os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+    else:
+        os.system("apt install ./google-chrome-stable_current_amd64.deb")
 else:
     st.write("Google Chrome installed already")
 
