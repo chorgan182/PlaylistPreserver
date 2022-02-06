@@ -42,7 +42,7 @@ def get_token(oauth):
     auth_url = oauth.get_authorize_url()
     
     # open the auth link in a new window
-    s = Service("./chromedriver.exe")
+    s = Service("./chromedriver")
     driver = webdriver.Chrome(service=s)
     driver.get(auth_url)
     
