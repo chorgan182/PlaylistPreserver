@@ -76,7 +76,7 @@ def app_sign_in():
         st.success("Sign in success!")
         st.session_state["signed_in"] = True
     return sp
-
+st.exp
 # %% app auth
 
 st.title("Spotify Playlist Preserver")
