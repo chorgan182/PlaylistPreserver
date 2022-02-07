@@ -91,8 +91,8 @@ if "cached_token" not in st.session_state:
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
 else:
-    st.write(" ".join("No tokens found for this session. Please log in by",
-                      "clicking the link below."))
+    st.write(" ".join(["No tokens found for this session. Please log in by",
+                      "clicking the link below."]))
     st.markdown("[Click me to authenticate!](%s)" % auth_url)
              
 
