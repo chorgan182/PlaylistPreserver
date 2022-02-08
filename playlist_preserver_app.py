@@ -103,6 +103,9 @@ if "code" not in st.session_state:
 # get current url params
 url_params = st.experimental_get_query_params()
 
+### troubleshooting
+st.write(url_params)
+
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
