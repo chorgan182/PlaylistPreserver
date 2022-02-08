@@ -106,13 +106,20 @@ url_params = st.experimental_get_query_params()
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
+# if no token, but code in url, get code, token, and sign in
 elif "code" in url_params:
     st.session_state["code"] = url_params["code"]
     st.session_state["cached_token"] = app_get_token()
+    sp = app_sign_in()
+# otherwise, prompt for redirect
 else:
     st.write(" ".join(["No tokens found for this session. Please log in by",
                       "clicking the link below."]))
-    st.markdown("[Click me to authenticate!](%s)" % auth_url)
+    link_html = " <a target=\"_self\" href=\"{url}\" >{msg}</a> ".format(
+        url=auth_url,
+        msg="Click me to authenticate!"
+    )
+    st.markdown(link_html, unsafe_allow_html=True)
     
 # %% app after auth
 
