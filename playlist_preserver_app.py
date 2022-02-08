@@ -111,7 +111,8 @@ if st.session_state["cached_token"] != "":
     sp = app_sign_in()
 # if no token, but code in url, get code, token, and sign in
 elif "code" in url_params:
-    st.session_state["code"] = url_params["code"]
+    st.write(url_params["code"][0])
+    st.session_state["code"] = url_params["code"][0]
     st.session_state["cached_token"] = app_get_token()
     sp = app_sign_in()
 # otherwise, prompt for redirect
