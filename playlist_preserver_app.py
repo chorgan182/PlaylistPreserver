@@ -36,10 +36,10 @@ auth_url = oauth.get_authorize_url()
 
 # %% base func definitions
 
-def get_token(response_url):
+def get_token(code):
     
     # parse the token from the response url
-    code = oauth.parse_response_code(response_url)
+    #code = oauth.parse_response_code(response_url)
     token = oauth.get_access_token(code, as_dict=False, check_cache=False)
     # remove cached token saved in directory
     os.remove(".cache")
@@ -55,9 +55,7 @@ def sign_in(token):
 
 def app_get_token():
     try:
-        token = get_token(oauth,
-                          user=st.session_state["input_user"],
-                          pw=st.session_state["input_pw"])
+        token = get_token(st.session_state["code"])
     except Exception as e:
         st.error("An error occurred during token retrieval!")
         st.write("The error is as follows:")
@@ -76,26 +74,46 @@ def app_sign_in():
         st.success("Sign in success!")
         st.session_state["signed_in"] = True
     return sp
-st.exp
+
 # %% app auth
 
 st.title("Spotify Playlist Preserver")
+
+st.markdown("""
+Welcome! :wave: This app uses the Spotify API interact with music info and 
+eventually, your playlists! In order to view and modify information associated
+with your account, you must log in. You only need to do this once. Even if no 
+tokens are found, if you are signed in on this browser, you'll just be
+redirected to the app after clicking the link.
+
+_Note: Unfortunately, the current version of Streamlit will not allow for
+staying on the same page, so the authorization and redirection will open in a 
+new tab. This has already been addressed in a development release, so it should
+be implemented in Streamlit Cloud soon!_
+""")
 
 # initialize session variables
 if "signed_in" not in st.session_state:
     st.session_state["signed_in"] = False
 if "cached_token" not in st.session_state:
     st.session_state["cached_token"] = ""
+if "code" not in st.session_state:
+    st.session_state["code"] = ""
+
+# get current url params
+url_params = st.experimental_get_query_params()
 
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
+elif "code" in url_params:
+    st.session_state["code"] = url_params["code"]
+    st.session_state["cached_token"] = app_get_token()
 else:
     st.write(" ".join(["No tokens found for this session. Please log in by",
                       "clicking the link below."]))
     st.markdown("[Click me to authenticate!](%s)" % auth_url)
-             
-
+    
 # %% app after auth
 
 # only display the following after login
