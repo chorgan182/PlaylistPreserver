@@ -103,17 +103,13 @@ if "code" not in st.session_state:
 # get current url params
 url_params = st.experimental_get_query_params()
 
-### troubleshooting
-st.write(url_params)
-
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
 # if no token, but code in url, get code, token, and sign in
 elif "code" in url_params:
-    st.write(url_params["code"][0])
     st.session_state["code"] = url_params["code"][0]
-    st.session_state["cached_token"] = app_get_token()
+    app_get_token()
     sp = app_sign_in()
 # otherwise, prompt for redirect
 else:
