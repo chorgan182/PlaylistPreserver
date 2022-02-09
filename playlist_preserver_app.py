@@ -47,6 +47,8 @@ def get_token(code):
     # return the token
     return token
 
+
+
 def sign_in(token):
     sp = spotipy.Spotify(auth=token)
     return sp
@@ -63,6 +65,8 @@ def app_get_token():
     else:
         st.session_state["cached_token"] = token
 
+
+
 def app_sign_in():
     try:
         sp = sign_in(st.session_state["cached_token"])
@@ -71,9 +75,13 @@ def app_sign_in():
         st.write("The error is as follows:")
         st.write(e)
     else:
-        st.success("Sign in success!")
         st.session_state["signed_in"] = True
+        app_display_welcome()
+        st.success("Sign in success!")
+        
     return sp
+
+
 
 def app_display_welcome():
 
@@ -115,14 +123,12 @@ url_params = st.experimental_get_query_params()
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
-    app_display_welcome()
 # if no token, but code in url, get code, parse token, and sign in
 elif "code" in url_params:
     # all params stored as lists, see doc for explanation
     st.session_state["code"] = url_params["code"][0]
     app_get_token()
     sp = app_sign_in()
-    app_display_welcome()
 # otherwise, prompt for redirect
 else:
     app_display_welcome()
