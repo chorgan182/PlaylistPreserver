@@ -75,6 +75,29 @@ def app_sign_in():
         st.session_state["signed_in"] = True
     return sp
 
+def app_display_welcome():
+
+    st.title("Spotify Playlist Preserver")
+
+    welcome_msg = """
+    Welcome! :wave: This app uses the Spotify API interact with music info and 
+    eventually, your playlists! In order to view and modify information associated
+    with your account, you must log in. You only need to do this once. Even if no 
+    tokens are found, if you are signed in on this browser, you'll just be
+    redirected to the app after clicking the link.
+    """
+    note_temp = """
+    _Note: Unfortunately, the current version of Streamlit will not allow for
+    staying on the same page, so the authorization and redirection will open in a 
+    new tab. This has already been addressed in a development release, so it should
+    be implemented in Streamlit Cloud soon!_
+    """
+
+    st.markdown(welcome_msg)
+
+    if not st.session_state["signed_in"]:
+        st.markdown(note_temp)
+
 # %% app session variable initialization
 
 if "signed_in" not in st.session_state:
@@ -83,29 +106,6 @@ if "cached_token" not in st.session_state:
     st.session_state["cached_token"] = ""
 if "code" not in st.session_state:
     st.session_state["code"] = ""
-    
-# %% app intro
-
-st.title("Spotify Playlist Preserver")
-
-welcome_msg = """
-Welcome! :wave: This app uses the Spotify API interact with music info and 
-eventually, your playlists! In order to view and modify information associated
-with your account, you must log in. You only need to do this once. Even if no 
-tokens are found, if you are signed in on this browser, you'll just be
-redirected to the app after clicking the link.
-"""
-note_temp = """
-_Note: Unfortunately, the current version of Streamlit will not allow for
-staying on the same page, so the authorization and redirection will open in a 
-new tab. This has already been addressed in a development release, so it should
-be implemented in Streamlit Cloud soon!_
-"""
-
-st.markdown(welcome_msg)
-
-if not st.session_state["signed_in"]:
-    st.markdown(note_temp)
 
 # %% authenticate with response stored in url
 
@@ -115,14 +115,17 @@ url_params = st.experimental_get_query_params()
 # attempt sign in with cached token
 if st.session_state["cached_token"] != "":
     sp = app_sign_in()
+    app_display_welcome()
 # if no token, but code in url, get code, parse token, and sign in
 elif "code" in url_params:
     # all params stored as lists, see doc for explanation
     st.session_state["code"] = url_params["code"][0]
     app_get_token()
     sp = app_sign_in()
+    app_display_welcome()
 # otherwise, prompt for redirect
 else:
+    app_display_welcome()
     # this SHOULD open the link in the same tab when Streamlit Cloud is updated
     # via the "_self" target
     st.write(" ".join(["No tokens found for this session. Please log in by",
