@@ -15,6 +15,8 @@ import os
 import datetime as dt
 import time
 
+time.tzset()
+
 # %% spotify connection set up
 
 # import secrets from streamlit deployment
@@ -110,8 +112,11 @@ def app_display_welcome():
         
         
 
-def app_remove_recent(nm_playlist, since, nm_playlist_new):
+def app_remove_recent(username, nm_playlist, since, nm_playlist_new):
     # get playlist id of selected playlist
+    playlists = sp.user_playlists(username)
+    playlist_names = [x["name"] for x in playlists["items"]]
+    playlist_ids = [x["id"] for x in playlists["items"]]
     pl_index = playlist_names.index(nm_playlist)
     pl_selected_id = playlist_ids[pl_index]
     
@@ -217,6 +222,7 @@ if st.session_state["signed_in"]:
         modify_confirm = st.form_submit_button("Modify!",
                                                on_click=app_remove_recent,
                                                args=(
+                                                   username,
                                                    pl_selected,
                                                    since_combined,
                                                    new_name
