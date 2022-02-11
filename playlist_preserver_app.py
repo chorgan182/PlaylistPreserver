@@ -217,7 +217,7 @@ if st.session_state["signed_in"]:
         since_combined = dt.datetime.combine(since_date, since_time)        
         
         # new playlist name
-        new_name = st.text_input("New playlist name")
+        new_name = st.text_input("New playlist name", key="new_name")
         
         modify_confirm = st.form_submit_button("Modify!",
                                                on_click=app_remove_recent,
@@ -225,7 +225,7 @@ if st.session_state["signed_in"]:
                                                    username,
                                                    pl_selected,
                                                    since_combined,
-                                                   new_name
+                                                   st.session_state["new_name"]
                                                    )
                                                )
         
