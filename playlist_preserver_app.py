@@ -113,6 +113,8 @@ def app_display_welcome():
         
 
 def app_remove_recent(username, nm_playlist, since, nm_playlist_new):
+    st.experimental_show()
+    
     # get playlist id of selected playlist
     playlists = sp.user_playlists(username)
     playlist_names = [x["name"] for x in playlists["items"]]
@@ -152,6 +154,8 @@ if "cached_token" not in st.session_state:
     st.session_state["cached_token"] = ""
 if "code" not in st.session_state:
     st.session_state["code"] = ""
+    
+    st.session_state()
 
 # %% authenticate with response stored in url
 
