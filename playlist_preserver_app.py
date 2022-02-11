@@ -12,6 +12,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 import os
+import datetime as dt
+import time
 
 # %% spotify connection set up
 
@@ -23,7 +25,9 @@ uri = st.secrets["SPOTIPY_REDIRECT_URI"]
 # set scope and establish connection
 scopes = " ".join(["user-read-private",
                    "playlist-read-private",
-                   "playlist-modify-private"])
+                   "playlist-modify-private",
+                   "playlist-modify-public",
+                   "user-read-recently-played"])
 
 # create oauth object
 oauth = SpotifyOAuth(scope=scopes,
@@ -37,9 +41,7 @@ auth_url = oauth.get_authorize_url()
 # %% base func definitions
 
 def get_token(code):
-    
-    # parse the token from the response url
-    #code = oauth.parse_response_code(response_url)
+
     token = oauth.get_access_token(code, as_dict=False, check_cache=False)
     # remove cached token saved in directory
     os.remove(".cache")
@@ -105,7 +107,38 @@ def app_display_welcome():
 
     if not st.session_state["signed_in"]:
         st.markdown(note_temp)
+        
+        
 
+def app_remove_recent(nm_playlist, since, nm_playlist_new):
+    # get playlist id of selected playlist
+    pl_index = playlist_names.index(nm_playlist)
+    pl_selected_id = playlist_ids[pl_index]
+    
+    # get playlist tracks of selected playlist
+    ### don't forget about pagination
+    pl_tracks = sp.playlist_tracks(pl_selected_id)
+    pl_ids = [x["track"]["id"] for x in pl_tracks["items"]]
+    
+    # get listening history
+    since_unix = int(time.mktime(since.timetuple()))
+    ### don't forget about pagination
+    recent_tracks = sp.current_user_recently_played(after=since_unix)
+    recent_ids = [x["track"]["id"] for x in recent_tracks["items"]]
+    
+    # create new playlist, info of playlist returned
+    new_pl = sp.user_playlist_create(user=username, name=nm_playlist_new)
+    # need to get id of new playlist
+    new_pl_id = new_pl["id"]
+    
+    # remove recently played from selected playlist
+    new_tracks = [x for x in pl_ids if x not in recent_ids]
+    
+    # add tracks to new playlist!
+    sp.user_playlist_add_tracks(user=username,
+                                playlist_id=new_pl_id, 
+                                tracks=new_tracks)    
+   
 # %% app session variable initialization
 
 if "signed_in" not in st.session_state:
@@ -153,8 +186,73 @@ if st.session_state["signed_in"]:
 
     st.markdown("Hi {n}! Let's modify a playlist or two :smiley:".format(n=name))
 
-    st.write("Please pick a playlist to modify")
-
     playlists = sp.user_playlists(username)
+    ### don't forget about pagination
     playlist_names = [x["name"] for x in playlists["items"]]
-    st.selectbox("Playlist: ", playlist_names)
+    playlist_ids = [x["id"] for x in playlists["items"]]
+    
+    with st.form("playlist_modify"):
+        # pick playlist
+        st.write("Please pick a playlist to modify")
+        pl_selected = st.selectbox("Playlist: ", playlist_names)
+        
+        # time cutoff
+        st.write("Remove all songs listened to since this time")
+        col1, col2 = st.columns(2)
+        
+        today = dt.date.today()
+        one_week_ago = today - dt.timedelta(days=7)
+        right_now = dt.datetime.now().time()
+        
+        since_date = col1.date_input("Date (max one week ago)",
+                                     value=today,
+                                     min_value=one_week_ago)
+        since_time = col2.time_input("Time",
+                                     value=right_now)
+        since_combined = dt.datetime.combine(since_date, since_time)        
+        
+        # new playlist name
+        new_name = st.text_input("New playlist name")
+        
+        modify_confirm = st.form_submit_button("Modify!",
+                                               on_click=app_remove_recent,
+                                               args=(
+                                                   pl_selected,
+                                                   since_combined,
+                                                   new_name
+                                                   )
+                                               )
+        
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
