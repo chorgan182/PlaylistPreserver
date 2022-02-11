@@ -155,7 +155,7 @@ if "cached_token" not in st.session_state:
 if "code" not in st.session_state:
     st.session_state["code"] = ""
     
-    st.session_state()
+    st.session_state
 
 # %% authenticate with response stored in url
 
