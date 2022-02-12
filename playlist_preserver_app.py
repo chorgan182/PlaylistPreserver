@@ -55,6 +55,36 @@ def sign_in(token):
     sp = spotipy.Spotify(auth=token)
     return sp
 
+
+
+def get_recents_all(after):
+    results = sp.current_user_recently_played(after=after)
+    tracks = results["items"]
+    while results["next"]:
+        results = sp.next(results)
+        tracks.extend(results["items"])
+    return tracks
+
+
+
+def get_playlists_all(username):
+    results = sp.user_playlists(username)
+    playlists = results["items"]
+    while results["next"]:
+        results = sp.next(results)
+        playlists.extend(results["items"])
+    return playlists
+
+
+
+def get_tracks_all(username, playlist_id):
+    results = sp.user_playlist_tracks(username, playlist_id)
+    tracks = results["items"]
+    while results["next"]:
+        results = sp.next(results)
+        tracks.extend(results["items"])
+    return tracks
+
 # %% app func definitions
 
 def app_get_token():
@@ -117,24 +147,22 @@ def app_remove_recent(username):
     nm_playlist_new = st.session_state["new_name"]
     
     # get playlist id of selected playlist
-    playlists = sp.user_playlists(username)
-    playlist_names = [x["name"] for x in playlists["items"]]
-    playlist_ids = [x["id"] for x in playlists["items"]]
+    playlists = get_playlists_all(username)
+    playlist_names = [x["name"] for x in playlists]
+    playlist_ids = [x["id"] for x in playlists]
     pl_index = playlist_names.index(nm_playlist)
     pl_selected_id = playlist_ids[pl_index]
     
     # get playlist tracks of selected playlist
-    ### don't forget about pagination
-    pl_tracks = sp.playlist_tracks(pl_selected_id)
-    pl_ids = [x["track"]["id"] for x in pl_tracks["items"]]
+    pl_tracks = get_tracks_all(username, pl_selected_id)
+    pl_ids = [x["track"]["id"] for x in pl_tracks]
     
     # get listening history
     # combine date inputs to datetime object
     since_combined = dt.datetime.combine(since_date, since_time)
     since_unix = int(time.mktime(since_combined.timetuple()))
-    ### don't forget about pagination
-    recent_tracks = sp.current_user_recently_played(after=since_unix)
-    recent_ids = [x["track"]["id"] for x in recent_tracks["items"]]
+    recent_tracks = get_recents_all(after=since_unix)
+    recent_ids = [x["track"]["id"] for x in recent_tracks]
     
     # create new playlist, info of playlist returned
     new_pl = sp.user_playlist_create(user=username, name=nm_playlist_new)
@@ -196,10 +224,9 @@ if st.session_state["signed_in"]:
 
     st.markdown("Hi {n}! Let's modify a playlist or two :smiley:".format(n=name))
 
-    playlists = sp.user_playlists(username)
-    ### don't forget about pagination
-    playlist_names = [x["name"] for x in playlists["items"]]
-    playlist_ids = [x["id"] for x in playlists["items"]]
+    playlists = get_playlists_all(username)
+    playlist_names = [x["name"] for x in playlists]
+    playlist_ids = [x["id"] for x in playlists]
     
     with st.form("playlist_modify", clear_on_submit=False):
         # get input for playlist to modify
