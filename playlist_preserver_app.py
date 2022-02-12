@@ -14,6 +14,8 @@ import streamlit as st
 import os
 import datetime as dt
 import time
+from urllib.request import Request
+import regex as re
 
 # %% spotify connection set up
 
@@ -61,11 +63,24 @@ def get_recents_all(after):
     results = sp.current_user_recently_played(after=after)
     tracks = results["items"]
     while results["next"]:
+        # I don't think the after param works correctly
+        # set it manually here
+        ### why don't any of the methods work for headers???
+        # req = Request(results["next"])
+        # next_after = req.get_header("after")
+        # req.header_items()
+        ### giving up and using regex
+        next_after = re.search("(?<=after=)\d+(?=&)", results["next"]).
+
+        
+        results["cursors"]["after"] = after
         results = sp.next(results)
         tracks.extend(results["items"])
     return tracks
 
 
+a = [1,2,3]
+a.extend([4,5])
 
 def get_playlists_all(username):
     results = sp.user_playlists(username)
@@ -75,7 +90,7 @@ def get_playlists_all(username):
         playlists.extend(results["items"])
     return playlists
 
-
+playlist_id = "0JOkNAFDauIrzmClH6UXsh"
 
 def get_tracks_all(username, playlist_id):
     results = sp.user_playlist_tracks(username, playlist_id)
@@ -160,7 +175,8 @@ def app_remove_recent(username):
     # get listening history
     # combine date inputs to datetime object
     since_combined = dt.datetime.combine(since_date, since_time)
-    since_unix = int(time.mktime(since_combined.timetuple()))
+    # needs to be in milliseconds
+    since_unix = int(time.mktime(since_combined.timetuple()))*1000
     recent_tracks = get_recents_all(after=since_unix)
     recent_ids = [x["track"]["id"] for x in recent_tracks]
     
@@ -175,7 +191,11 @@ def app_remove_recent(username):
     # add tracks to new playlist!
     sp.user_playlist_add_tracks(user=username,
                                 playlist_id=new_pl_id, 
-                                tracks=new_tracks)    
+                                tracks=new_tracks)
+    
+    # gotta do a celly
+    st.success("New playlist created! Check your Spotify App")
+    st.balloons()
    
 # %% app session variable initialization
 

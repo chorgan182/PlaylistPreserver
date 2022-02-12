@@ -15,6 +15,11 @@ today = datetime.date.today()
 one_week_ago = today - datetime.timedelta(days=7)
 right_now = datetime.datetime.now().time()
 
+# testing for recent func
+combined = datetime.datetime.combine(one_week_ago, right_now)
+after = int(time.mktime(combined.timetuple())) * 1000
+after = time.mktime(combined.timetuple())
+
 since_date = col1.date_input("Date (max one week ago)",
                              value=today,
                              min_value=one_week_ago)
@@ -26,8 +31,7 @@ st.write(datetime.datetime.combine(since_date, since_time))
 
 
 # %% leave for testing
-response = "http://localhost:8501/?code=AQBlt_aKJCXDJFQ42pr7JAFXGWb4MfXSUlmeEwcpBAbyEWKmtH86Z5WCHuSnMJdBa5uJ7jSbeMcaGComm7-LjgPRAsjlqFXyoDpKMo0rHU0QzRHPnfs864GiJmaf2qUhRrxIi2ZCHA-36-_nqqqkMgzrXxbZ3pNeEDiPX7r96BgogntGFfEnMI1UO2wiFsP6HIoHZMs7LUAIU3lt4IHThXSYab-j4NOSj-YpXiIBBTgMRn4NqRf_ZRJBDvanLM0KOVh9nIUTVHli2UxqNBE_yAH1ukTkmY-I4Ec86g4jEd43b1OYFXeouIIwT3_sDZ4V"
+response = "http://localhost:8501/?code=AQAdDdJJokjchKiPih10c8SqcTpflPxnXa-KWSnVf9D_BMA22Bzl3G_mpIb9PZoIHGZmwzpQMX6_KVGfVHN3kz5h9PyMBb_lSbOXFdGZTBX5MeXslAU8YT1_j2QC4_uneTMGxLEhP7LigbfUZeuxyXVrny_ZkUCoPowpucV933xCSJGwl_i1eac1QN0nttpKw75LnJwacqzjGhjaHin-34OZdEToFgVjDt3iDQ2azAgzJ6M8pL7TNNI50mNCWM8giGqqat_JfNyPa2Nju1v5WENO3VbjYS0bVIs3jRBVg20OZQPoM19nrTATu9DAGZv6"
 code = oauth.parse_response_code(response)
 token = oauth.get_access_token(code, as_dict=False)
 sp = spotipy.Spotify(auth=token)
-
