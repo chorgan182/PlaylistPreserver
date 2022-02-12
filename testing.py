@@ -26,7 +26,7 @@ st.write(datetime.datetime.combine(since_date, since_time))
 
 
 # %% leave for testing
-response = "http://localhost:8501/?code=AQAKgHMsSuWgXLjlVYNIPCnKuNK-7wtoj8XJgxYqh0KqWgbktnje28V8oU_C7EyCMvr1oEkfTaiRf0Cpq0KqKwnZxT9ETRiT26nlQD4xCrtWugqHAR0nui7lD4TqQ3PG9UZmVm8XyGAKuWgOQh0h2DSJD_3sG2Cppxt3-xRjOPshwej8mHOPx9yi6VUYmvN-N-CE9KtU2WWFvEtA-UriP1SGItdkiiPUDamlNIkbbVlbxTuwivYljCZsfD40ZJvfPlQopNzMLLxzJ33i0Jd8qPJ-8OkYPlYaGwZYg-QSXow0Z7cOMLiuYC4FMTP--O3x"
+response = "http://localhost:8501/?code=AQBlt_aKJCXDJFQ42pr7JAFXGWb4MfXSUlmeEwcpBAbyEWKmtH86Z5WCHuSnMJdBa5uJ7jSbeMcaGComm7-LjgPRAsjlqFXyoDpKMo0rHU0QzRHPnfs864GiJmaf2qUhRrxIi2ZCHA-36-_nqqqkMgzrXxbZ3pNeEDiPX7r96BgogntGFfEnMI1UO2wiFsP6HIoHZMs7LUAIU3lt4IHThXSYab-j4NOSj-YpXiIBBTgMRn4NqRf_ZRJBDvanLM0KOVh9nIUTVHli2UxqNBE_yAH1ukTkmY-I4Ec86g4jEd43b1OYFXeouIIwT3_sDZ4V"
 code = oauth.parse_response_code(response)
 token = oauth.get_access_token(code, as_dict=False)
 sp = spotipy.Spotify(auth=token)

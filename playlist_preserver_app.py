@@ -111,58 +111,43 @@ def app_display_welcome():
         
 
 def app_remove_recent(username):
-    
-    st.write("okay this is dumb")
     nm_playlist = st.session_state["pl_selected"]
     since_date = st.session_state["since_date"]
     since_time = st.session_state["since_time"]
     nm_playlist_new = st.session_state["new_name"]
     
-    st.write(username,
-             nm_playlist,
-             since_date,
-             since_time,
-             nm_playlist_new)
-
-
+    # get playlist id of selected playlist
+    playlists = sp.user_playlists(username)
+    playlist_names = [x["name"] for x in playlists["items"]]
+    playlist_ids = [x["id"] for x in playlists["items"]]
+    pl_index = playlist_names.index(nm_playlist)
+    pl_selected_id = playlist_ids[pl_index]
     
+    # get playlist tracks of selected playlist
+    ### don't forget about pagination
+    pl_tracks = sp.playlist_tracks(pl_selected_id)
+    pl_ids = [x["track"]["id"] for x in pl_tracks["items"]]
     
+    # get listening history
     # combine date inputs to datetime object
-    #since_combined = dt.datetime.combine(since_date, since_time)
-
-# def app_remove_recent(username, nm_playlist, since, nm_playlist_new):
-#     st.experimental_show()
+    since_combined = dt.datetime.combine(since_date, since_time)
+    since_unix = int(time.mktime(since_combined.timetuple()))
+    ### don't forget about pagination
+    recent_tracks = sp.current_user_recently_played(after=since_unix)
+    recent_ids = [x["track"]["id"] for x in recent_tracks["items"]]
     
-#     # get playlist id of selected playlist
-#     playlists = sp.user_playlists(username)
-#     playlist_names = [x["name"] for x in playlists["items"]]
-#     playlist_ids = [x["id"] for x in playlists["items"]]
-#     pl_index = playlist_names.index(nm_playlist)
-#     pl_selected_id = playlist_ids[pl_index]
+    # create new playlist, info of playlist returned
+    new_pl = sp.user_playlist_create(user=username, name=nm_playlist_new)
+    # need to get id of new playlist
+    new_pl_id = new_pl["id"]
     
-#     # get playlist tracks of selected playlist
-#     ### don't forget about pagination
-#     pl_tracks = sp.playlist_tracks(pl_selected_id)
-#     pl_ids = [x["track"]["id"] for x in pl_tracks["items"]]
+    # remove recently played from selected playlist
+    new_tracks = [x for x in pl_ids if x not in recent_ids]
     
-#     # get listening history
-#     since_unix = int(time.mktime(since.timetuple()))
-#     ### don't forget about pagination
-#     recent_tracks = sp.current_user_recently_played(after=since_unix)
-#     recent_ids = [x["track"]["id"] for x in recent_tracks["items"]]
-    
-#     # create new playlist, info of playlist returned
-#     new_pl = sp.user_playlist_create(user=username, name=nm_playlist_new)
-#     # need to get id of new playlist
-#     new_pl_id = new_pl["id"]
-    
-#     # remove recently played from selected playlist
-#     new_tracks = [x for x in pl_ids if x not in recent_ids]
-    
-#     # add tracks to new playlist!
-#     sp.user_playlist_add_tracks(user=username,
-#                                 playlist_id=new_pl_id, 
-#                                 tracks=new_tracks)    
+    # add tracks to new playlist!
+    sp.user_playlist_add_tracks(user=username,
+                                playlist_id=new_pl_id, 
+                                tracks=new_tracks)    
    
 # %% app session variable initialization
 
@@ -216,7 +201,7 @@ if st.session_state["signed_in"]:
     playlist_names = [x["name"] for x in playlists["items"]]
     playlist_ids = [x["id"] for x in playlists["items"]]
     
-    with st.form("playlist_modify", clear_on_submit=True):
+    with st.form("playlist_modify", clear_on_submit=False):
         # get input for playlist to modify
         st.write("Please pick a playlist to modify")
         pl_selected = st.selectbox("Playlist: ", playlist_names,
@@ -245,5 +230,5 @@ if st.session_state["signed_in"]:
         # submit button
         modify_confirm = st.form_submit_button("Modify!",
                                                on_click=app_remove_recent,
-                                               args=(username))
+                                               args=(username,))
                                                
