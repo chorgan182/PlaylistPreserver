@@ -59,26 +59,44 @@ def sign_in(token):
 
 
 
-def get_recents_all(after):
-    results = sp.current_user_recently_played(after=after)
-    tracks = results["items"]
-    while results["next"]:
-        # I don't think the after param works correctly
-        # set it manually here
-        ### why don't any of the methods work for headers???
-        # req = Request(results["next"])
-        # next_after = req.get_header("after")
-        # req.header_items()
-        ### giving up and using regex
-        next_after = re.search("(?<=after=)\d+(?=&)", results["next"]).
+def get_recents_all(since):
+    
 
-        
-        results["cursors"]["after"] = after
+
+
+    
+    pattern_after = "(?<=after=)\d+(?=&)"
+    str_after = str(after)
+    # the next method does not work here bc an offset header is not set
+    offset_count = 0
+    
+    while results["next"]:
+        # after param has a bug
+        # set it manually here
+        # (plus, cursors are outdated according to issue on github)
+        next_after = re.search(pattern_after, results["next"]).group()
+        if next_after != str_after:
+            next_fixed = re.sub(pattern_after, str_after, results["next"])
+            results["next"] = next_fixed
+        # increment offset (should be the value of limit but I know it's 50)
+        offset_count += 50
+        offset_str = str(offset_count)
+        if not re.search("offset=", results["next"]):
+            offset_insert = "&offset=" + offset_str
+            first_part = re.search(".+recently-played\?", results["next"]).group()
+            second_part = re.search("after=.+", results["next"]).group()
+            next_fixed = first_part + offset_insert + second_part
+            results["next"] = next_fixed
+        else:
+            next_fixed = re.sub("(?<=offset=)[0-9]+", offset_str, results["next"])
+            results["next"] = next_fixed
+
         results = sp.next(results)
         tracks.extend(results["items"])
+        
     return tracks
 
-
+test = get_recents_all(after)
 a = [1,2,3]
 a.extend([4,5])
 
@@ -90,7 +108,7 @@ def get_playlists_all(username):
         playlists.extend(results["items"])
     return playlists
 
-playlist_id = "0JOkNAFDauIrzmClH6UXsh"
+playlist_id = "3m8vvNPoEN83tbwgz5xY1Q"
 
 def get_tracks_all(username, playlist_id):
     results = sp.user_playlist_tracks(username, playlist_id)
@@ -100,7 +118,7 @@ def get_tracks_all(username, playlist_id):
         tracks.extend(results["items"])
     return tracks
 
-# %% app func definitions
+"# %% app func definitions
 
 def app_get_token():
     try:
