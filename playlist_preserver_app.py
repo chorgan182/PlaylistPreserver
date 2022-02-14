@@ -14,8 +14,6 @@ import streamlit as st
 import os
 import datetime as dt
 import time
-from urllib.request import Request
-import regex as re
 
 # %% spotify connection set up
 
@@ -59,46 +57,58 @@ def sign_in(token):
 
 
 
+def get_correct_limit(stop, start):
+    '''
+    All credit to https://github.com/irenechang1510 for this function idea.
+    '''    
+    
+    # start at 50 and move backwards until correct timestamp is found
+    # re run the API call until 'before' is greater than the stop timestamp
+    limit = 50
+    while limit > 0:
+        obj = sp.current_user_recently_played(before=start, limit=limit)
+        mark = int(obj['cursors']['before'])
+        
+        # get the track played right after the stop timestamp
+        if mark > stop:
+            break
+        # otherwise, decrease the limit by 1 and try again
+        limit -= 1
+    
+    return limit
+
+
+### in the end, this endpoint is simply broken
+### cannot do anything until Spotify fixes it
 def get_recents_all(since):
     
-
-
-
+    # for some reason, you have to move backwards instead of forward
+    # the after header seems pointless because it still starts at current time
+    # but the next() method returns a results object with no 'next' dict element?
     
-    pattern_after = "(?<=after=)\d+(?=&)"
-    str_after = str(after)
-    # the next method does not work here bc an offset header is not set
-    offset_count = 0
+    now = int(time.mktime(dt.datetime.now().timetuple())) * 1000
+    start = now
     
-    while results["next"]:
-        # after param has a bug
-        # set it manually here
-        # (plus, cursors are outdated according to issue on github)
-        next_after = re.search(pattern_after, results["next"]).group()
-        if next_after != str_after:
-            next_fixed = re.sub(pattern_after, str_after, results["next"])
-            results["next"] = next_fixed
-        # increment offset (should be the value of limit but I know it's 50)
-        offset_count += 50
-        offset_str = str(offset_count)
-        if not re.search("offset=", results["next"]):
-            offset_insert = "&offset=" + offset_str
-            first_part = re.search(".+recently-played\?", results["next"]).group()
-            second_part = re.search("after=.+", results["next"]).group()
-            next_fixed = first_part + offset_insert + second_part
-            results["next"] = next_fixed
-        else:
-            next_fixed = re.sub("(?<=offset=)[0-9]+", offset_str, results["next"])
-            results["next"] = next_fixed
-
-        results = sp.next(results)
+    tracks = []
+    while (start > since):
+        results = sp.current_user_recently_played(before=start, limit=50)
+        try:
+            next_stop = int(results["cursors"]["before"])
+        except:
+            next_stop = since
+        # eventually, the next stop will move past the desired since timestamp
+        if next_stop < since:
+            last_limit = get_correct_limit(since, start)
+            if last_limit != 0:
+                results = sp.current_user_recently_played(before=start,
+                                                          limit=last_limit)
+            else:
+                break
         tracks.extend(results["items"])
-        
+        start = next_stop
     return tracks
 
-test = get_recents_all(after)
-a = [1,2,3]
-a.extend([4,5])
+
 
 def get_playlists_all(username):
     results = sp.user_playlists(username)
@@ -118,7 +128,7 @@ def get_tracks_all(username, playlist_id):
         tracks.extend(results["items"])
     return tracks
 
-"# %% app func definitions
+# %% app func definitions
 
 def app_get_token():
     try:
