@@ -54,6 +54,10 @@ combined = dt.datetime.combine(one_week_ago, right_now)
 since = int(time.mktime(combined.timetuple())) * 1000
 
 # %%
+# a playlist with more than 100 tracks
+playlist_id = "3m8vvNPoEN83tbwgz5xY1Q"
+
+# %%
 st.write("Remove all songs listened to since this time")
 col1, col2 = st.columns(2)
 
