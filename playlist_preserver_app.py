@@ -118,7 +118,7 @@ def get_playlists_all(username):
         playlists.extend(results["items"])
     return playlists
 
-playlist_id = "3m8vvNPoEN83tbwgz5xY1Q"
+
 
 def get_tracks_all(username, playlist_id):
     results = sp.user_playlist_tracks(username, playlist_id)
@@ -205,7 +205,7 @@ def app_remove_recent(username):
     since_combined = dt.datetime.combine(since_date, since_time)
     # needs to be in milliseconds
     since_unix = int(time.mktime(since_combined.timetuple()))*1000
-    recent_tracks = get_recents_all(after=since_unix)
+    recent_tracks = get_recents_all(since_unix)
     recent_ids = [x["track"]["id"] for x in recent_tracks]
     
     # create new playlist, info of playlist returned
