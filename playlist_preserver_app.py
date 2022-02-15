@@ -223,10 +223,14 @@ def app_remove_recent(username):
         random.shuffle(new_tracks)
     
     # add tracks to new playlist!
-    sp.user_playlist_add_tracks(user=username,
-                                playlist_id=new_pl_id, 
-                                tracks=new_tracks)
-    
+    # can only write 100 at a time to the spotify API
+    chunk_size = 100
+    for i in range(0, len(new_tracks), chunk_size):
+        chunk = new_tracks[i:i+chunk_size]
+        sp.user_playlist_add_tracks(user=username,
+                                    playlist_id=new_pl_id, 
+                                    tracks=chunk)
+        
     # gotta do a celly
     st.success("New playlist created! Check your Spotify App")
     st.balloons()
