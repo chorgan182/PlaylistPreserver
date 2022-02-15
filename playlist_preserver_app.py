@@ -14,6 +14,7 @@ import streamlit as st
 import os
 import datetime as dt
 import time
+import random
 
 # %% spotify connection set up
 
@@ -188,6 +189,7 @@ def app_remove_recent(username):
     since_date = st.session_state["since_date"]
     since_time = st.session_state["since_time"]
     nm_playlist_new = st.session_state["new_name"]
+    shuffle = st.session_state["shuffle"]
     
     # get playlist id of selected playlist
     playlists = get_playlists_all(username)
@@ -215,6 +217,10 @@ def app_remove_recent(username):
     
     # remove recently played from selected playlist
     new_tracks = [x for x in pl_ids if x not in recent_ids]
+    
+    # shuffle if desired
+    if shuffle:
+        random.shuffle(new_tracks)
     
     # add tracks to new playlist!
     sp.user_playlist_add_tracks(user=username,
@@ -300,6 +306,8 @@ if st.session_state["signed_in"]:
         since_time = col2.time_input("Time",
                                      value=right_now,
                                      key="since_time")
+        # get input for shuffle option
+        shuffle = st.checkbox("Shuffle output?", value=True, key="shuffle")
                 
         
         # submit button
