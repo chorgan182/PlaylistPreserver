@@ -189,11 +189,12 @@ def app_display_welcome():
     """
 
     st.title("Spotify Playlist Preserver")
-    st.markdown(welcome_msg)
-    st.write(" ".join(["No tokens found for this session. Please log in by",
-                      "clicking the link below."]))
-    st.markdown(link_html, unsafe_allow_html=True)
+
     if not st.session_state["signed_in"]:
+        st.markdown(welcome_msg)
+        st.write(" ".join(["No tokens found for this session. Please log in by",
+                          "clicking the link below."]))
+        st.markdown(link_html, unsafe_allow_html=True)
         st.markdown(note_temp)
         
         
