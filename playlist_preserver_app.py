@@ -18,30 +18,11 @@ import random
 
 # %% spotify connection set up
 
-# import secrets from streamlit deployment
-cid = st.secrets["SPOTIPY_CLIENT_ID"]
-csecret = st.secrets["SPOTIPY_CLIENT_SECRET"]
-uri = st.secrets["SPOTIPY_REDIRECT_URI"]
 
-# set scope and establish connection
-scopes = " ".join(["user-read-private",
-                   "playlist-read-private",
-                   "playlist-modify-private",
-                   "playlist-modify-public",
-                   "user-read-recently-played"])
-
-# create oauth object
-oauth = SpotifyOAuth(scope=scopes,
-                     redirect_uri=uri,
-                     client_id=cid,
-                     client_secret=csecret)
-
-# retrieve auth url
-auth_url = oauth.get_authorize_url()
 
 # %% base func definitions
 
-def get_token(code):
+def get_token(oauth, code):
 
     token = oauth.get_access_token(code, as_dict=False, check_cache=False)
     # remove cached token saved in directory
@@ -133,7 +114,7 @@ def get_tracks_all(username, playlist_id):
 
 def app_get_token():
     try:
-        token = get_token(st.session_state["code"])
+        token = get_token(st.session_state["oauth"], st.session_state["code"])
     except Exception as e:
         st.error("An error occurred during token retrieval!")
         st.write("The error is as follows:")
@@ -160,16 +141,46 @@ def app_sign_in():
 
 
 def app_display_welcome():
+    
+    # import secrets from streamlit deployment
+    cid = st.secrets["SPOTIPY_CLIENT_ID"]
+    csecret = st.secrets["SPOTIPY_CLIENT_SECRET"]
+    uri = st.secrets["SPOTIPY_REDIRECT_URI"]
 
-    st.title("Spotify Playlist Preserver")
+    # set scope and establish connection
+    scopes = " ".join(["user-read-private",
+                       "playlist-read-private",
+                       "playlist-modify-private",
+                       "playlist-modify-public",
+                       "user-read-recently-played"])
 
+    # create oauth object
+    oauth = SpotifyOAuth(scope=scopes,
+                         redirect_uri=uri,
+                         client_id=cid,
+                         client_secret=csecret)
+    # store oauth in session
+    st.session_state["oauth"] = oauth
+
+    # retrieve auth url
+    auth_url = oauth.get_authorize_url()
+    
+    # this SHOULD open the link in the same tab when Streamlit Cloud is updated
+    # via the "_self" target
+    link_html = " <a target=\"_self\" href=\"{url}\" >{msg}</a> ".format(
+        url=auth_url,
+        msg="Click me to authenticate!"
+    )
+    
+    # define welcome
     welcome_msg = """
-    Welcome! :wave: This app uses the Spotify API interact with music info and 
-    eventually, your playlists! In order to view and modify information associated
-    with your account, you must log in. You only need to do this once. Even if no 
-    tokens are found, if you are signed in on this browser, you'll just be
-    redirected to the app after clicking the link.
+    Welcome! :wave: This app uses the Spotify API to interact with general 
+    music info and your playlists! In order to view and modify information 
+    associated with your account, you must log in. You only need to do this 
+    once.
     """
+    
+    # define temporary note
     note_temp = """
     _Note: Unfortunately, the current version of Streamlit will not allow for
     staying on the same page, so the authorization and redirection will open in a 
@@ -177,13 +188,16 @@ def app_display_welcome():
     be implemented in Streamlit Cloud soon!_
     """
 
+    st.title("Spotify Playlist Preserver")
     st.markdown(welcome_msg)
-
+    st.write(" ".join(["No tokens found for this session. Please log in by",
+                      "clicking the link below."]))
+    st.markdown(link_html, unsafe_allow_html=True)
     if not st.session_state["signed_in"]:
         st.markdown(note_temp)
         
         
-
+        
 def app_remove_recent(username):
     nm_playlist = st.session_state["pl_selected"]
     since_date = st.session_state["since_date"]
@@ -243,6 +257,8 @@ if "cached_token" not in st.session_state:
     st.session_state["cached_token"] = ""
 if "code" not in st.session_state:
     st.session_state["code"] = ""
+if "oauth" not in st.session_state:
+    st.session_state["oauth"] = None
 
 # %% authenticate with response stored in url
 
@@ -261,15 +277,6 @@ elif "code" in url_params:
 # otherwise, prompt for redirect
 else:
     app_display_welcome()
-    # this SHOULD open the link in the same tab when Streamlit Cloud is updated
-    # via the "_self" target
-    st.write(" ".join(["No tokens found for this session. Please log in by",
-                      "clicking the link below."]))
-    link_html = " <a target=\"_self\" href=\"{url}\" >{msg}</a> ".format(
-        url=auth_url,
-        msg="Click me to authenticate!"
-    )
-    st.markdown(link_html, unsafe_allow_html=True)
     
 # %% after auth, get user info
 
@@ -281,6 +288,24 @@ if st.session_state["signed_in"]:
     username = user["id"]
 
     st.markdown("Hi {n}! Let's modify a playlist or two :smiley:".format(n=name))
+    
+    st.markdown("""
+    Have you ever been listening to a long playlist and want to continue where
+    you left off the next day, without re-listening to songs? The original goal 
+    of this app was to create a new playlist by removing the songs you had 
+    listened to from a selected playlist, given a time cutoff. Unfortunately, 
+    Spotify's "recently played" API endpoint is broken, so you can only see the 
+    50 most recently played (which is not very useful for the goal).
+    
+    For now, it will accomplish the removing, but only if those songs were in
+    your play history less than 50 songs ago. It _will_ shuffle the playlist, so 
+    that's useful at least, given Spotify's shuffle algorithm is not a true
+    shuffle. 
+    
+    Given the above, I'll be thinking about other things to do with the API
+    :smile:
+    """
+    )
 
     playlists = get_playlists_all(username)
     playlist_names = [x["name"] for x in playlists]
