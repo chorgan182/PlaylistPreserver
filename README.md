@@ -10,6 +10,8 @@ Have you ever...
 
 This app solves those problems by creating a new playlist with recently played songs removed. Given a time cutoff, you can select a playlist in your account, name the new playlist, and enable/disable a true shuffle.
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/chorgan182/playlistpreserver/qry-param-method/playlist_preserver_app.py)
+
 ## Known Issues
 
 - The Spotify Developer hub was recently changed to limit client traffic to 25 _named_ users.
@@ -23,5 +25,3 @@ This app solves those problems by creating a new playlist with recently played s
   - Custom HTML options for hyperlinks are not supported in the version of Streamlit used for Streamlit Cloud.
   - This has already been addressed in a development release, so it should be implemented in Streamlit Cloud soon.
   - More in [merged PR](https://github.com/streamlit/streamlit/pull/4364) here.
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/chorgan182/playlistpreserver/qry-param-method/playlist_preserver_app.py)
